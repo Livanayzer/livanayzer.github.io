@@ -535,3 +535,285 @@ body::after {
   .bg-grid { animation: none !important; }
   .bg-orb { animation: none !important; }
 }
+
+
+/* ===== HAZE SYSTEM BOOT — ПРЕМИУМ АНИМАЦИЯ ===== */
+
+.logo-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+  isolation: isolate;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+/* Лёгкое увеличение контейнера при ховере */
+.logo-container:hover {
+  transform: scale(1.02);
+}
+
+/* Внешние кольца */
+.logo-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  opacity: 0;
+}
+
+.logo-ring.r1 {
+  animation: ringAppear 1s ease forwards, ringRotate 12s linear infinite;
+}
+
+.logo-ring.r2 {
+  inset: 12px;
+  animation: ringAppear 1s ease forwards 0.15s, ringRotateReverse 16s linear infinite;
+}
+
+.logo-ring.r3 {
+  inset: 24px;
+  animation: ringAppear 1s ease forwards 0.3s, pulseRing 3s ease-in-out infinite;
+}
+
+/* Scan line */
+.logo-scan {
+  position: absolute;
+  width: 180%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+  transform: rotate(-20deg) translateX(-220px);
+  opacity: 0;
+  animation: scanSweep 1.6s ease forwards 0.5s;
+  pointer-events: none;
+}
+
+/* Логотип */
+.logo-image {
+  position: relative;
+  width: 90px;
+  height: auto;
+  z-index: 5;
+  opacity: 0;
+  transform: scale(0.7) rotate(-8deg);
+  filter: blur(10px) brightness(1.4);
+  animation: logoResolve 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards 0.7s;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), filter 0.3s ease;
+}
+
+/* Hover эффект */
+.logo-container:hover .logo-image {
+  transform: scale(1.04);
+  filter: drop-shadow(0 0 24px rgba(255, 255, 255, 0.22));
+}
+
+/* ===== АНИМАЦИИ ===== */
+
+@keyframes logoResolve {
+  0% {
+    opacity: 0;
+    transform: scale(0.65) rotate(-10deg);
+    filter: blur(14px) brightness(2);
+  }
+  40% {
+    opacity: 0.45;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    filter: blur(0) brightness(1);
+  }
+}
+
+@keyframes ringAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ringRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ringRotateReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes pulseRing {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 0.5;
+  }
+}
+
+@keyframes scanSweep {
+  0% {
+    opacity: 0;
+    transform: rotate(-20deg) translateX(-220px);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(-20deg) translateX(220px);
+  }
+}
+
+/* Бонус: финальная вспышка "система стабильна" */
+.logo-container::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: finalGlow 0.6s ease-out forwards;
+  animation-delay: 1.4s;
+}
+
+@keyframes finalGlow {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.4;
+  }
+  100% {
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+  }
+}
+
+/* ===== HAZE SYSTEM BOOT — НОРМАЛЬНЫЙ РАЗМЕР ===== */
+
+/* Хедер — обрезаем всё, что выходит за пределы */
+.header {
+  overflow: hidden;  /* ← КЛЮЧЕВОЕ: обрезает вылезающие кольца */
+}
+
+.logo-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;        /* увеличил с 80px */
+  height: 180px;       /* увеличил с 80px */
+  isolation: isolate;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+/* Лёгкое увеличение контейнера при ховере */
+.logo-container:hover {
+  transform: scale(1.02);
+}
+
+/* Внешние кольца */
+.logo-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  opacity: 0;
+}
+
+.logo-ring.r1 {
+  inset: -8px;         /* чуть вылезает, но обрезается хедером */
+  animation: ringAppear 1s ease forwards, ringRotate 12s linear infinite;
+}
+
+.logo-ring.r2 {
+  inset: 4px;
+  animation: ringAppear 1s ease forwards 0.15s, ringRotateReverse 16s linear infinite;
+}
+
+.logo-ring.r3 {
+  inset: 16px;
+  animation: ringAppear 1s ease forwards 0.3s, pulseRing 3s ease-in-out infinite;
+}
+
+/* Scan line */
+.logo-scan {
+  position: absolute;
+  width: 200%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+  transform: rotate(-20deg) translateX(-200px);
+  opacity: 0;
+  animation: scanSweep 1.6s ease forwards 0.5s;
+  pointer-events: none;
+}
+
+/* Логотип — нормальный размер */
+.logo-container .logo-image {
+  position: relative;
+  width: 130px;         /* было 48px, стало 64px */
+  height: auto;
+  z-index: 5;
+  opacity: 0;
+  transform: scale(0.7) rotate(-8deg);
+  filter: blur(10px) brightness(1.4);
+  animation: logoResolve 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards 0.7s;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), filter 0.3s ease;
+}
+
+/* Hover эффект */
+.logo-container:hover .logo-image {
+  transform: scale(1.04);
+  filter: drop-shadow(0 0 24px rgba(255, 255, 255, 0.22));
+}
+
+/* Финальная вспышка */
+.logo-container::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: finalGlow 0.6s ease-out forwards;
+  animation-delay: 1.4s;
+}
+
+@keyframes finalGlow {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.4;
+  }
+  100% {
+    width: 160px;
+    height: 160px;
+    opacity: 0;
+  }
+}
