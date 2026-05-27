@@ -1,5 +1,5 @@
-import { initCursor } from './modules/cursor.js';
-import { initServices } from './modules/services.js';
+import { initCursor } from './cursor.js';
+import { initServices } from './services.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   initCursor();
