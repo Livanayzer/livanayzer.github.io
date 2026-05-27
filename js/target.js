@@ -3,11 +3,12 @@
   var CONFIG = {
     comboTimeout: 2500,
     particleBaseCount: 5,
-    maxParticles: 60,
+    maxParticles: 200,
     ctaIntervalAfterMax: 15,
     bossHP: 30,
     bossDuration: 8000,
-    audio: { hit: 0.12, combo: 0.25, milestone: 0.4, cta: 0.2 }
+    audio: { hit: 0.12, combo: 0.25, milestone: 0.4, cta: 0.2 },
+    throttleDelay: 16 // ~60fps
   };
 
   var MILESTONES = {
@@ -44,7 +45,7 @@
 
   var BOSS_CTA = '🔥 БОСС ПОВЕРЖЕН!';
 
-  // ============ DOM ============
+  // ============ DOM ЭЛЕМЕНТЫ ============
   var heroTarget = document.getElementById('heroTarget');
   var nodeCenter = document.getElementById('nodeCenter');
   var hitRipple = document.getElementById('hitRipple');
@@ -53,6 +54,7 @@
 
   if (!heroTarget) return;
 
+  // ============ СОСТОЯНИЕ ============
   var comboCount = 0;
   var totalScore = 0;
   var comboTimer = null;
@@ -65,6 +67,8 @@
   var hasFirstBlood = false;
   var chainReactionActive = false;
   var chainReactionTimer = null;
+  var lastHitTime = 0;
+  var throttleTimer = null;
 
   // Босс
   var bossActive = false;
@@ -93,49 +97,57 @@
   // ============ AUDIO ============
   var audioCtx = null;
   var audioBuffers = {};
+  var audioInitialized = false;
 
   function initAudio() {
-    if (audioCtx) {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      return;
-    }
+    if (audioInitialized) return;
+    
     try {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      loadAudioFile('hit', 'sounds/hit.mp3');
-      loadAudioFile('combo', 'sounds/combo.mp3');
-      loadAudioFile('milestone', 'sounds/milestone.mp3');
-    } catch(e) {}
+      
+      // Создаём простые звуки синтетически (чтобы не зависеть от файлов)
+      audioInitialized = true;
+      
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    } catch(e) {
+      console.warn('Web Audio API не поддерживается');
+    }
   }
 
-  function loadAudioFile(name, url) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-    xhr.responseType = 'arraybuffer';
-    xhr.onload = function() {
-      if (xhr.status === 200 && audioCtx) {
-        audioCtx.decodeAudioData(xhr.response, function(decoded) { audioBuffers[name] = decoded; });
-      }
-    };
-    xhr.send();
+  function playBeep(frequency, duration, volume) {
+    if (!audioCtx || !audioInitialized) return;
+    
+    try {
+      var now = audioCtx.currentTime;
+      var oscillator = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      
+      oscillator.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      oscillator.frequency.value = frequency || 880;
+      gain.gain.value = volume || 0.15;
+      
+      oscillator.start();
+      gain.gain.exponentialRampToValueAtTime(0.00001, now + (duration || 0.1));
+      oscillator.stop(now + (duration || 0.1));
+    } catch(e) {}
   }
 
   function playSound(name, volume, rate) {
-    if (!audioCtx || !audioBuffers[name]) return;
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    try {
-      var source = audioCtx.createBufferSource();
-      var gain = audioCtx.createGain();
-      source.buffer = audioBuffers[name];
-      source.playbackRate.value = rate || 1;
-      gain.gain.value = volume || 0.15;
-      source.connect(gain);
-      gain.connect(audioCtx.destination);
-      source.start(0);
-    } catch(e) {}
+    if (!audioInitialized) return;
+    
+    var sounds = {
+      hit: { freq: 660, dur: 0.08 },
+      combo: { freq: 880, dur: 0.12 },
+      milestone: { freq: 1046.5, dur: 0.2 }
+    };
+    
+    var s = sounds[name] || sounds.hit;
+    playBeep(s.freq, s.dur, volume || 0.15);
   }
-
-  document.addEventListener('click', initAudio);
-  document.addEventListener('touchstart', initAudio, { passive: true });
 
   // ============ ДОСТИЖЕНИЯ ============
   function unlockAchievement(id) {
@@ -144,6 +156,8 @@
     try { localStorage.setItem('haze_achievements', JSON.stringify(achievements)); } catch(e) {}
     
     var ach = ACHIEVEMENTS[id];
+    if (!ach) return;
+    
     var rect = heroTarget.getBoundingClientRect();
     showFloatingText(rect.left + rect.width / 2, rect.top - 80, ach.icon + ' ' + ach.name + '!', '#ffd700');
     playSound('milestone', 0.5, 1.2);
@@ -162,21 +176,30 @@
     scoreEl.textContent = '★ ' + totalScore;
   }
 
-  // ============ PARTICLE SYSTEM ============
-  function spawnParticles(x, y, count, color, size, spread) {
-    if (activeParticles > CONFIG.maxParticles) {
-      heroParticles.innerHTML = '';
-      activeParticles = 0;
+  // ============ PARTICLE SYSTEM (ОПТИМИЗИРОВАН) ============
+  function clearOldParticles() {
+    if (heroParticles.children.length > CONFIG.maxParticles) {
+      var toRemove = heroParticles.children.length - CONFIG.maxParticles;
+      for (var i = 0; i < toRemove; i++) {
+        if (heroParticles.firstChild) heroParticles.firstChild.remove();
+      }
+      activeParticles = heroParticles.children.length;
     }
-    count = Math.min(count, CONFIG.maxParticles - activeParticles);
+  }
+
+  function spawnParticles(x, y, count, color, size, spread) {
+    clearOldParticles();
+    
+    count = Math.min(count, 30);
     if (count <= 0) return;
-    activeParticles += count;
+    
     var frag = document.createDocumentFragment();
+    
     for (var i = 0; i < count; i++) {
       var p = document.createElement('div');
       p.className = 'hero-particle';
-      var angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
-      var dist = (spread || 50) * (0.4 + Math.random() * 0.6);
+      var angle = Math.random() * Math.PI * 2;
+      var dist = (spread || 40) * (0.3 + Math.random() * 0.7);
       p.style.left = x + 'px';
       p.style.top = y + 'px';
       p.style.width = (size || 2) + 'px';
@@ -184,9 +207,15 @@
       p.style.backgroundColor = color || '#ffffff';
       p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
       p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
-      p.addEventListener('animationend', function() { p.remove(); activeParticles = Math.max(0, activeParticles - 1); });
+      p.style.opacity = (0.5 + Math.random() * 0.5);
+      
+      p.addEventListener('animationend', function() {
+        this.remove();
+      });
+      
       frag.appendChild(p);
     }
+    
     heroParticles.appendChild(frag);
   }
 
@@ -199,12 +228,14 @@
     el.style.top = y + 'px';
     el.style.color = color || '#ffffff';
     el.style.fontSize = '16px';
+    el.style.fontWeight = 'bold';
     el.style.textShadow = '0 0 20px ' + (color || '#ffffff');
+    el.style.whiteSpace = 'nowrap';
     el.addEventListener('animationend', function() { el.remove(); });
     document.body.appendChild(el);
   }
 
-  // ============ CTA ============
+  // ============ CTA POPUP ============
   function showCTA(x, y, customText) {
     var msg = customText || CTA_MESSAGES[Math.floor(Math.random() * CTA_MESSAGES.length)];
     var container = document.createElement('div');
@@ -223,8 +254,7 @@
         '<div class="hero-cta-card">' +
           '<div class="hero-cta-line1">' + msg[0] + '</div>' +
           '<div class="hero-cta-line2">' + msg[1] + '</div>' +
-        '</div>' +
-        '<div class="hero-cta-phone"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.19 18.9"/></svg></div>';
+        '</div>';
     }
     
     document.body.appendChild(container);
@@ -238,7 +268,6 @@
     bossActive = true;
     bossHP = CONFIG.bossHP;
     
-    // Создаём элемент босса
     bossEl = document.createElement('div');
     bossEl.className = 'hero-boss';
     bossEl.style.cssText = 
@@ -246,11 +275,10 @@
       'background:radial-gradient(circle,#ff4444,#990000);border-radius:50%;' +
       'border:3px solid #ffd700;box-shadow:0 0 40px rgba(255,0,0,0.8);' +
       'display:flex;flex-direction:column;align-items:center;justify-content:center;' +
-      'z-index:1000;cursor:pointer;transition:transform 0.3s ease;';
+      'z-index:1000;cursor:pointer;';
     
     bossEl.innerHTML = '<div style="font-size:40px;pointer-events:none;">👾</div><div style="font-size:12px;color:#fff;pointer-events:none;">БОСС</div>';
     
-    // Полоска HP
     var bossHPBar = document.createElement('div');
     bossHPBar.style.cssText = 
       'position:absolute;bottom:-20px;left:0;width:100%;height:8px;background:#330000;border-radius:4px;overflow:hidden;';
@@ -259,23 +287,18 @@
     bossHPBar.appendChild(bossHPFill);
     bossEl.appendChild(bossHPBar);
     
-    // ДОБАВЛЯЕМ ОБРАБОТЧИК КЛИКА НА БОССА
     bossEl.addEventListener('click', function(e) {
-      e.stopPropagation(); // Останавливаем всплытие
+      e.stopPropagation();
       hitBoss(e.clientX, e.clientY);
     });
     
     document.body.appendChild(bossEl);
     
-    // Таймер исчезновения босса
     bossTimer = setTimeout(function() {
       if (bossActive) defeatBoss(false);
     }, CONFIG.bossDuration);
     
-    // Анимация появления
-    bossEl.style.transform = 'scale(0)';
     setTimeout(function() { if (bossEl) bossEl.style.transform = 'scale(1)'; }, 10);
-    
     showFloatingText(x, y - 60, '⚠️ БОСС ПОЯВИЛСЯ! ⚠️', '#ff4444');
     playSound('milestone', 0.6, 0.7);
   }
@@ -290,15 +313,12 @@
       bossHPFill.style.width = percent + '%';
     }
     
-    spawnParticles(clickX, clickY, 12, '#ff4444', 3, 60);
+    spawnParticles(clickX, clickY, 15, '#ff4444', 3, 60);
     playSound('hit', 0.3, 1.4);
     
-    // Встряска босса
     bossEl.style.transform = 'scale(0.85)';
     setTimeout(function() { if (bossEl) bossEl.style.transform = 'scale(1)'; }, 100);
-    
-    // Показываем урон
-    showFloatingText(clickX, clickY - 20, '-' + Math.floor(CONFIG.bossHP / 10 + 1), '#ff8888');
+    showFloatingText(clickX, clickY - 20, 'УРОН!', '#ff8888');
     
     if (bossHP <= 0) {
       clearTimeout(bossTimer);
@@ -321,16 +341,14 @@
     bossHPFill = null;
     
     if (won) {
-      spawnParticles(cx, cy, 60, '#ffd700', 4, 180);
-      spawnParticles(cx, cy, 40, '#ff4444', 3, 140);
-      spawnParticles(cx, cy, 20, '#ffffff', 5, 200);
-      showFloatingText(cx, cy - 50, '🏆 ПОБЕДА!', '#ffd700');
+      spawnParticles(cx, cy, 40, '#ffd700', 4, 180);
+      showFloatingText(cx, cy - 50, '🏆 ПОБЕДА! +500 ★', '#ffd700');
       showCTA(cx, cy - 100, BOSS_CTA);
       unlockAchievement('bossSlayer');
       updateScore(500);
     } else {
       showFloatingText(cx, cy - 50, '💀 Босс ушёл...', '#888888');
-      spawnParticles(cx, cy, 30, '#888888', 2, 100);
+      spawnParticles(cx, cy, 20, '#888888', 2, 100);
     }
   }
 
@@ -384,8 +402,7 @@
       comboCounter.textContent = text;
       comboCounter.style.color = color;
       comboCounter.classList.remove('show');
-      void comboCounter.offsetWidth;
-      comboCounter.classList.add('show');
+      setTimeout(function() { if (comboCounter) comboCounter.classList.add('show'); }, 10);
     } else if (comboCounter && !text) {
       comboCounter.classList.remove('show');
       comboCounter.textContent = '';
@@ -404,12 +421,11 @@
       }
     }
     
-    // Секретные фразы
     var secretKeys = Object.keys(SECRET_PHRASES).map(Number);
     for (var i = 0; i < secretKeys.length; i++) {
       var secretThreshold = secretKeys[i];
       if (comboBefore < secretThreshold && comboAfter >= secretThreshold) {
-        showFloatingText(cx, cy - 40 - achievedMilestones.length * 25, SECRET_PHRASES[secretThreshold], '#ffd700');
+        showFloatingText(cx, cy - 40, SECRET_PHRASES[secretThreshold], '#ffd700');
         if (secretThreshold === 7) unlockAchievement('lucky7');
         if (secretThreshold === 100) unlockAchievement('centurion');
       }
@@ -436,11 +452,11 @@
       if (m.spawnBoss) hasBoss = true;
       
       if (achievedMilestones[i] === 50) unlockAchievement('fifty');
-      updateScore(50 * Math.floor(achievedMilestones[i] / 10));
+      updateScore(50);
     }
     
     if (hasBurst) {
-      spawnParticles(cx, cy, 30, '#ffd700', 3, 100);
+      spawnParticles(cx, cy, 25, '#ffd700', 3, 100);
       heroTarget.style.boxShadow = berserkMode ? '0 0 80px rgba(255,50,50,0.8)' : '0 0 60px rgba(255,215,0,0.5)';
       setTimeout(function() { heroTarget.style.boxShadow = ''; }, 400);
     }
@@ -448,7 +464,6 @@
     if (hasBoss) spawnBoss(cx, cy);
     if (hasCTA) showCTA(cx, cy - 70);
     
-    // Если milestone не достигнут, но комбо выше 1
     if (achievedMilestones.length === 0 && comboAfter > 1) {
       for (var i = keys.length - 1; i >= 0; i--) {
         if (comboAfter >= keys[i]) {
@@ -456,9 +471,6 @@
           currentColor = MILESTONES[keys[i]].color;
           break;
         }
-      }
-      if (comboAfter > 50 && comboAfter % CONFIG.ctaIntervalAfterMax === 0) {
-        showCTA(cx, cy - 70);
       }
     }
     
@@ -471,36 +483,46 @@
     return achievedMilestones.length > 0;
   }
 
-  // ============ ПРОВЕРКА KONAMI CODE ============
+  // ============ KONAMI CODE ============
   function checkKonamiCode() {
     var rect = heroTarget.getBoundingClientRect();
     showFloatingText(rect.left + rect.width / 2, rect.top + rect.height / 2, '🎉 EASTER EGG! 🎉', '#ff00ff');
     for (var i = 0; i < 5; i++) {
       (function(d) {
         setTimeout(function() {
-          spawnParticles(rect.left + Math.random() * rect.width, rect.top + Math.random() * rect.height, 20, '#ff00ff', 4, 60);
+          spawnParticles(rect.left + Math.random() * rect.width, rect.top + Math.random() * rect.height, 15, '#ff00ff', 4, 60);
         }, d * 200);
       })(i);
     }
     playSound('milestone', 0.7, 1.5);
     unlockAchievement('kojima');
-    if (navigator.vibrate) navigator.vibrate([50, 50, 50, 50, 200]);
   }
 
-  // ============ ОСНОВНОЙ ОБРАБОТЧИК КЛИКА НА МИШЕНЬ ============
-  heroTarget.addEventListener('click', function(e) {
+  // ============ ОСНОВНОЙ ОБРАБОТЧИК ============
+  function handleHit(e) {
     e.preventDefault();
     e.stopPropagation();
-    initAudio();
-
+    
+    // Инициализируем аудио при первом хите
+    if (!audioInitialized) {
+      initAudio();
+    }
+    
+    // Throttle для производительности
+    var now = Date.now();
+    if (throttleTimer) return;
+    throttleTimer = setTimeout(function() { throttleTimer = null; }, CONFIG.throttleDelay);
+    
     var rect = heroTarget.getBoundingClientRect();
+    var clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+    var clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
     var cx = rect.left + rect.width / 2;
     var cy = rect.top + rect.height / 2;
-    var distFromCenter = Math.sqrt(Math.pow(e.clientX - cx, 2) + Math.pow(e.clientY - cy, 2));
+    
+    var distFromCenter = Math.sqrt(Math.pow(clientX - cx, 2) + Math.pow(clientY - cy, 2));
     var maxDist = rect.width / 2;
     var accuracy = 1 - Math.min(1, distFromCenter / maxDist);
-
-    // Определяем multiplier
+    
     var multiplier = 1;
     var isPerfect = false;
     
@@ -512,8 +534,7 @@
     } else if (accuracy < 0.3) {
       multiplier = 0;
     }
-
-    // Промах
+    
     if (multiplier === 0) {
       comboCount = 0;
       showFloatingText(cx, cy, 'Промах!', '#ff0000');
@@ -521,100 +542,99 @@
       updateComboDisplay(null, null);
       return;
     }
-
-    // Сохраняем комбо до удара
-    var comboBefore = comboCount;
     
-    // Обычное попадание
+    var comboBefore = comboCount;
     comboCount++;
     updateScore(10 * multiplier);
     
-    // Первая кровь
     if (!hasFirstBlood) {
       hasFirstBlood = true;
       unlockAchievement('firstBlood');
     }
-
-    // Сброс таймера комбо
+    
     clearTimeout(comboTimer);
     comboTimer = setTimeout(function() { 
       comboCount = 0;
       updateComboDisplay(null, null);
     }, CONFIG.comboTimeout);
-
-    // Берсерк-режим
+    
     if (berserkMode) {
       berserkClicks++;
       comboCount += 2;
-      spawnParticles(cx, cy, 6, '#ff3333', 2, 45);
+      spawnParticles(cx, cy, 8, '#ff3333', 2, 45);
       
       if (berserkClicks >= 15) {
         showFloatingText(cx, cy - 30, '💥 УЛЬТРА-УДАР! 💥', '#ff3333');
-        spawnParticles(cx, cy, 50, '#ff3333', 3, 140);
+        spawnParticles(cx, cy, 40, '#ff3333', 3, 140);
         playSound('milestone', 0.7, 0.6);
         berserkClicks = 0;
         updateScore(100);
       }
     }
-
-    // Активация берсерка при комбо 10+
+    
     if (comboCount >= 10 && !berserkMode) {
       activateBerserkMode();
     }
-
-    // Звук попадания
+    
     playSound('hit', CONFIG.audio.hit, 0.7 + accuracy * 0.5);
-
-    // Визуальные эффекты попадания
+    
     if (nodeCenter) {
       nodeCenter.classList.add('hit');
       setTimeout(function() { nodeCenter.classList.remove('hit'); }, 250);
     }
-
+    
     if (hitRipple) {
       hitRipple.classList.add('expand');
       setTimeout(function() { hitRipple.classList.remove('expand'); }, 500);
     }
-
-    // Частицы
+    
     var pColor = berserkMode ? '#ff3333' : (isPerfect ? '#ffd700' : '#ffffff');
-    var pCount = Math.floor(CONFIG.particleBaseCount + Math.min(comboCount, 30) * 0.5);
-    spawnParticles(cx, cy, pCount, pColor, 1.8, 45);
-
-    // Множитель ×2
+    var pCount = Math.min(5 + Math.floor(comboCount / 5), 20);
+    spawnParticles(cx, cy, pCount, pColor, 2, 45);
+    
     if (multiplier === 2) {
-      showFloatingText(e.clientX, e.clientY - 20, '×2!', '#ffd700');
+      showFloatingText(clientX, clientY - 20, '×2!', '#ffd700');
     }
-
-    // Обработка milestones и секретных фраз
+    
     processMilestones(comboBefore, comboCount, cx, cy);
-
-    // Вибрация
-    if (navigator.vibrate) {
-      navigator.vibrate(Math.min(20 + comboCount, 100));
-    }
-  });
-
-  // ============ KONAMI CODE ============
+    
+    lastHitTime = now;
+  }
+  
+  // Добавляем обработчики для мыши и тача
+  heroTarget.addEventListener('click', handleHit);
+  heroTarget.addEventListener('touchstart', handleHit, { passive: false });
+  
+  // KONAMI CODE
   document.addEventListener('keydown', function(e) {
     konamiCode.push(e.keyCode);
     if (konamiCode.length > KONAMI_SEQUENCE.length) konamiCode.shift();
-    if (konamiCode.join(',') === KONAMI_SEQUENCE.join(',')) {
+    
+    var match = true;
+    for (var i = 0; i < konamiCode.length; i++) {
+      if (konamiCode[i] !== KONAMI_SEQUENCE[i]) {
+        match = false;
+        break;
+      }
+    }
+    
+    if (match && konamiCode.length === KONAMI_SEQUENCE.length) {
       checkKonamiCode();
       konamiCode = [];
     }
   });
-
-  // ============ ДОСТУПНОСТЬ (ENTER/SPACE) ============
-  heroTarget.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      heroTarget.click();
-    }
-  });
   
-  // ============ ВЫСТАВЛЯЕМ TABINDEX ДЛЯ ДОСТУПНОСТИ ============
+  // Доступность
   heroTarget.setAttribute('tabindex', '0');
   heroTarget.setAttribute('role', 'button');
   heroTarget.setAttribute('aria-label', 'Кликер-мишень');
+  
+  heroTarget.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleHit(e);
+    }
+  });
+  
+  console.log('🎯 Target game initialized!');
 })();

@@ -1,4 +1,5 @@
 (function() {
+  // Иконки прямо внутри файла (без импортов)
   var icons = {
     video: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="16" height="14" rx="2"/><polygon points="23 7 18 10.5 18 13.5 23 17 23 7"/><circle cx="8" cy="12" r="2"/></svg>',
     lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1"/></svg>',
@@ -11,28 +12,59 @@
     refresh: '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.5 9a9 9 0 0 1 14.8-3.4L23 10M1 14l4.7 4.7A9 9 0 0 0 20.5 15"/></svg>'
   };
 
+  function getIcon(name) {
+    return icons[name] || icons.video;
+  }
+
+  // Функция для создания элемента
   function createElement(tag, attrs) {
     attrs = attrs || {};
     var el = document.createElement(tag);
     Object.keys(attrs).forEach(function(k) {
-      if (k === 'class') el.className = attrs[k];
-      else el.setAttribute(k, attrs[k]);
+      if (k === 'class') {
+        el.className = attrs[k];
+      } else {
+        el.setAttribute(k, attrs[k]);
+      }
     });
     return el;
   }
 
+  // Переключение вкладок
+  function switchTab(card, selectedBtn) {
+    var tablist = card.querySelector('.tabs');
+    if (!tablist) return;
+    
+    tablist.querySelectorAll('.tab-btn').forEach(function(btn) {
+      btn.setAttribute('aria-selected', 'false');
+    });
+    
+    card.querySelectorAll('.tab-panel').forEach(function(panel) {
+      panel.setAttribute('aria-hidden', 'true');
+    });
+    
+    selectedBtn.setAttribute('aria-selected', 'true');
+    
+    var panelId = selectedBtn.getAttribute('data-panel');
+    if (panelId) {
+      var panel = card.querySelector('#' + panelId);
+      if (panel) panel.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  // Создание карточки услуги
   function buildServiceCard(service, index) {
-    var card = createElement('div', { class: 'service-card', role: 'tablist', 'aria-label': service.title });
+    var card = createElement('div', { class: 'service-card' });
     
     var iconDiv = createElement('div', { class: 'service-icon' });
-    iconDiv.innerHTML = icons[service.icon] || '';
+    iconDiv.innerHTML = getIcon(service.icon);
     card.appendChild(iconDiv);
     
     var title = createElement('h3');
     title.textContent = service.title;
     card.appendChild(title);
     
-    var tabsContainer = createElement('div', { class: 'tabs' });
+    var tabsContainer = createElement('div', { class: 'tabs', role: 'tablist' });
     var panelsContainer = createElement('div');
     
     service.tabs.forEach(function(tab, ti) {
@@ -41,19 +73,29 @@
       var isFirst = ti === 0;
       
       var btn = createElement('button', {
-        class: 'tab-btn', role: 'tab',
+        class: 'tab-btn',
+        role: 'tab',
+        id: tabId,
         'aria-selected': isFirst ? 'true' : 'false',
-        'aria-controls': panelId, id: tabId, 'data-panel': panelId
+        'aria-controls': panelId,
+        'data-panel': panelId
       });
       btn.textContent = tab.name;
-      btn.addEventListener('click', function() { switchTab(card, btn); });
+      
+      btn.addEventListener('click', (function(card, button) {
+        return function() { switchTab(card, button); };
+      })(card, btn));
+      
       tabsContainer.appendChild(btn);
       
       var panel = createElement('div', {
-        class: 'tab-panel', role: 'tabpanel',
-        id: panelId, 'aria-labelledby': tabId,
+        class: 'tab-panel',
+        role: 'tabpanel',
+        id: panelId,
+        'aria-labelledby': tabId,
         'aria-hidden': isFirst ? 'false' : 'true'
       });
+      
       var ul = createElement('ul');
       tab.items.forEach(function(item) {
         var li = createElement('li');
@@ -76,17 +118,25 @@
     return card;
   }
 
-  function switchTab(card, selectedBtn) {
-    card.querySelectorAll('.tab-btn').forEach(function(b) { b.setAttribute('aria-selected', 'false'); });
-    card.querySelectorAll('.tab-panel').forEach(function(p) { p.setAttribute('aria-hidden', 'true'); });
-    selectedBtn.setAttribute('aria-selected', 'true');
-    var panel = card.querySelector('#' + selectedBtn.getAttribute('data-panel'));
-    if (panel) panel.setAttribute('aria-hidden', 'false');
+  // Показать скелетон
+  function showSkeleton(grid, count) {
+    grid.innerHTML = '';
+    for (var i = 0; i < count; i++) {
+      var skeleton = createElement('div', { class: 'skeleton-card skeleton-loader' });
+      grid.appendChild(skeleton);
+    }
   }
 
+  // Рендер услуг
   function renderServices(grid, services) {
+    grid.innerHTML = '';
     var fragment = document.createDocumentFragment();
-    services.forEach(function(s, i) { fragment.appendChild(buildServiceCard(s, i)); });
+    
+    services.forEach(function(service, i) {
+      var card = buildServiceCard(service, i);
+      fragment.appendChild(card);
+    });
+    
     grid.appendChild(fragment);
     
     var observer = new IntersectionObserver(function(entries) {
@@ -99,20 +149,41 @@
       });
     }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
     
-    grid.querySelectorAll('.service-card').forEach(function(card) { observer.observe(card); });
+    grid.querySelectorAll('.service-card').forEach(function(card) {
+      observer.observe(card);
+    });
   }
 
+  // Загрузка данных
+  function loadServices(grid) {
+    showSkeleton(grid, 6);
+    
+    if (window.servicesData && window.servicesData.services) {
+      renderServices(grid, window.servicesData.services);
+      return;
+    }
+    
+    fetch('data/services.json')
+      .then(function(response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+      })
+      .then(function(data) {
+        if (data && data.services) {
+          renderServices(grid, data.services);
+        } else {
+          throw new Error('Неверный формат данных');
+        }
+      })
+      .catch(function(error) {
+        console.error('Ошибка загрузки услуг:', error);
+        grid.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.5);padding:60px;">⚠️ Не удалось загрузить услуги. Пожалуйста, обновите страницу.</div>';
+      });
+  }
+
+  // Запуск
   var grid = document.getElementById('servicesGrid');
   if (grid) {
-    if (window.servicesData) {
-      renderServices(grid, window.servicesData.services);
-    } else {
-      fetch('data/services.json')
-        .then(function(r) { return r.json(); })
-        .then(function(data) { renderServices(grid, data.services); })
-        .catch(function() {
-          grid.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.3);">Не удалось загрузить услуги</p>';
-        });
-    }
+    loadServices(grid);
   }
 })();

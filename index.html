@@ -29,9 +29,16 @@
 <header class="header">
   <div class="container header-inner">
     <a href="/" class="logo-container" aria-label="HAZE IT — на главную">
-        <img src="logo.png" alt="HAZE IT" class="logo-image" width="56" height="56">
+      <img src="logo.png" alt="HAZE IT" class="logo-image" width="56" height="56">
     </a>
-    <nav class="nav-links" aria-label="Основная навигация">
+    
+    <button class="burger-btn" id="burgerBtn" aria-label="Меню" aria-expanded="false">
+      <span class="burger-line"></span>
+      <span class="burger-line"></span>
+      <span class="burger-line"></span>
+    </button>
+    
+    <nav class="nav-links" id="navLinks" aria-label="Основная навигация">
       <a href="#services">Услуги</a>
       <a href="#cases">Проекты</a>
       <a href="#guarantees">Гарантии</a>
@@ -70,11 +77,11 @@
   <section id="services">
     <div class="container">
       <h2 class="section-title">Услуги</h2>
-      <div class="services-grid" id="servicesGrid" role="tablist" aria-label="Список услуг"></div>
+      <div class="services-grid" id="servicesGrid"></div>
     </div>
   </section>
 
-    <!-- DataMobile -->
+  <!-- DataMobile -->
   <section id="datamobile">
     <div class="container">
       <h2 class="section-title">Автоматизация склада и торговли</h2>
@@ -91,30 +98,14 @@
       </div>
       
       <div class="datamobile-grid">
-        <!-- Карточка 1 -->
         <div class="dm-card">
-          <div class="dm-card-header">
-            <h3>DataMobile</h3>
-            <span class="dm-badge">Популярное</span>
-          </div>
+          <div class="dm-card-header"><h3>DataMobile</h3><span class="dm-badge">Популярное</span></div>
           <p>ПО для терминалов сбора данных и мобильных устройств. Автоматизация склада, приёмка, отгрузка, инвентаризация.</p>
           <div class="dm-versions">
-            <div class="dm-version">
-              <span class="dm-version-name">Стандарт</span>
-              <span class="dm-version-price">от 936 ₽</span>
-            </div>
-            <div class="dm-version">
-              <span class="dm-version-name">Стандарт Pro</span>
-              <span class="dm-version-price">от 1 716 ₽</span>
-            </div>
-            <div class="dm-version">
-              <span class="dm-version-name">Online Lite</span>
-              <span class="dm-version-price">от 2 496 ₽</span>
-            </div>
-            <div class="dm-version">
-              <span class="dm-version-name">Online</span>
-              <span class="dm-version-price">от 3 120 ₽</span>
-            </div>
+            <div class="dm-version"><span class="dm-version-name">Стандарт</span><span class="dm-version-price">от 936 ₽</span></div>
+            <div class="dm-version"><span class="dm-version-name">Стандарт Pro</span><span class="dm-version-price">от 1 716 ₽</span></div>
+            <div class="dm-version"><span class="dm-version-name">Online Lite</span><span class="dm-version-price">от 2 496 ₽</span></div>
+            <div class="dm-version"><span class="dm-version-name">Online</span><span class="dm-version-price">от 3 120 ₽</span></div>
           </div>
           <div class="dm-modules">
             <span class="dm-module">Маркировка — от 1 500 ₽</span>
@@ -124,21 +115,12 @@
           <a href="contact.html" class="dm-link">Запросить лицензию →</a>
         </div>
         
-        <!-- Карточка 2 -->
         <div class="dm-card">
-          <div class="dm-card-header">
-            <h3>DM.Основные средства</h3>
-          </div>
+          <div class="dm-card-header"><h3>DM.Основные средства</h3></div>
           <p>Учёт и обслуживание основных фондов. Инвентаризация IT-оборудования, станков, строений, мебели.</p>
           <div class="dm-versions">
-            <div class="dm-version">
-              <span class="dm-version-name">DM.Invent</span>
-              <span class="dm-version-price">от 2 700 ₽</span>
-            </div>
-            <div class="dm-version">
-              <span class="dm-version-name">DM.ТОИР</span>
-              <span class="dm-version-price">от 2 925 ₽</span>
-            </div>
+            <div class="dm-version"><span class="dm-version-name">DM.Invent</span><span class="dm-version-price">от 2 700 ₽</span></div>
+            <div class="dm-version"><span class="dm-version-name">DM.ТОИР</span><span class="dm-version-price">от 2 925 ₽</span></div>
           </div>
           <div class="dm-modules">
             <span class="dm-module">RFID для Invent — от 5 400 ₽</span>
@@ -148,59 +130,32 @@
           <a href="contact.html" class="dm-link">Запросить лицензию →</a>
         </div>
         
-        <!-- Карточка 3 -->
         <div class="dm-card">
-          <div class="dm-card-header">
-            <h3>DM.Прайсчекер</h3>
-          </div>
+          <div class="dm-card-header"><h3>DM.Прайсчекер</h3></div>
           <p>Идентификация товара по штрих-коду с выводом цены, изображения и акций. Увеличивает средний чек.</p>
           <div class="dm-versions">
-            <div class="dm-version">
-              <span class="dm-version-name">Прайсчекер</span>
-              <span class="dm-version-price">от 2 100 ₽</span>
-            </div>
+            <div class="dm-version"><span class="dm-version-name">Прайсчекер</span><span class="dm-version-price">от 2 100 ₽</span></div>
           </div>
           <a href="contact.html" class="dm-link">Запросить лицензию →</a>
         </div>
         
-        <!-- Карточка 4 -->
         <div class="dm-card">
-          <div class="dm-card-header">
-            <h3>DM.Доставка Pro</h3>
-          </div>
+          <div class="dm-card-header"><h3>DM.Доставка Pro</h3></div>
           <p>Автоматизация курьеров по 54-ФЗ. Поддержка онлайн-касс и банковских терминалов.</p>
           <div class="dm-versions">
-            <div class="dm-version">
-              <span class="dm-version-name">Доставка Pro</span>
-              <span class="dm-version-price">от 1 560 ₽</span>
-            </div>
+            <div class="dm-version"><span class="dm-version-name">Доставка Pro</span><span class="dm-version-price">от 1 560 ₽</span></div>
           </div>
           <a href="contact.html" class="dm-link">Запросить лицензию →</a>
         </div>
         
-        <!-- Карточка 5 -->
         <div class="dm-card">
-          <div class="dm-card-header">
-            <h3>DataMobile Upgrade</h3>
-          </div>
+          <div class="dm-card-header"><h3>DataMobile Upgrade</h3></div>
           <p>Обновление текущей версии до более старшей с расширением функционала.</p>
           <div class="dm-versions">
-            <div class="dm-version">
-              <span class="dm-version-name">Подписка 1 мес.</span>
-              <span class="dm-version-price">от 624 ₽</span>
-            </div>
-            <div class="dm-version">
-              <span class="dm-version-name">Подписка 6 мес.</span>
-              <span class="dm-version-price">от 1 872 ₽</span>
-            </div>
-            <div class="dm-version">
-              <span class="dm-version-name">Подписка 12 мес.</span>
-              <span class="dm-version-price">от 2 574 ₽</span>
-            </div>
-            <div class="dm-version">
-              <span class="dm-version-name">Upgrade Lifetime</span>
-              <span class="dm-version-price">от 2 457 ₽</span>
-            </div>
+            <div class="dm-version"><span class="dm-version-name">Подписка 1 мес.</span><span class="dm-version-price">от 624 ₽</span></div>
+            <div class="dm-version"><span class="dm-version-name">Подписка 6 мес.</span><span class="dm-version-price">от 1 872 ₽</span></div>
+            <div class="dm-version"><span class="dm-version-name">Подписка 12 мес.</span><span class="dm-version-price">от 2 574 ₽</span></div>
+            <div class="dm-version"><span class="dm-version-name">Upgrade Lifetime</span><span class="dm-version-price">от 2 457 ₽</span></div>
           </div>
           <a href="contact.html" class="dm-link">Запросить лицензию →</a>
         </div>
@@ -271,26 +226,11 @@
     <div class="container">
       <h2 class="section-title">Частые вопросы</h2>
       <div class="faq-list">
-        <details class="faq-item">
-          <summary>Сколько стоит видеонаблюдение для офиса?<svg class="faq-arrow" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
-          <div class="faq-answer">Стоимость зависит от количества камер, типа оборудования и сложности монтажа. Базовый комплект на 4 камеры — от 35 000 ₽ под ключ. Точную смету готовим после бесплатного выезда инженера на объект.</div>
-        </details>
-        <details class="faq-item">
-          <summary>Даёте ли вы гарантию на оборудование?<svg class="faq-arrow" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
-          <div class="faq-answer">Да, на всё оборудование действует официальная гарантия производителя (от 1 до 3 лет). На монтажные работы — наша гарантия 12 месяцев.</div>
-        </details>
-        <details class="faq-item">
-          <summary>Работаете ли вы с государственными организациями?<svg class="faq-arrow" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
-          <div class="faq-answer">Да, у нас есть опыт работы с бюджетными организациями. Участвуем в тендерах и готовим документацию по 44-ФЗ и 223-ФЗ.</div>
-        </details>
-        <details class="faq-item">
-          <summary>Можно ли модернизировать существующую систему?<svg class="faq-arrow" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
-          <div class="faq-answer">Да, мы часто модернизируем существующие системы: заменяем устаревшее оборудование, расширяем покрытие Wi-Fi, добавляем новые камеры к уже работающей системе.</div>
-        </details>
-        <details class="faq-item">
-          <summary>Как быстро выезжаете на аварийные заявки?<svg class="faq-arrow" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary>
-          <div class="faq-answer">Для клиентов на абонентском обслуживании — выезд в течение 2 часов по Москве и области. Удалённая диагностика — в течение 30 минут после обращения.</div>
-        </details>
+        <details class="faq-item"><summary>Сколько стоит видеонаблюдение для офиса?<svg class="faq-arrow" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary><div class="faq-answer">Стоимость зависит от количества камер, типа оборудования и сложности монтажа. Базовый комплект на 4 камеры — от 35 000 ₽ под ключ. Точную смету готовим после бесплатного выезда инженера на объект.</div></details>
+        <details class="faq-item"><summary>Даёте ли вы гарантию на оборудование?<svg class="faq-arrow" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary><div class="faq-answer">Да, на всё оборудование действует официальная гарантия производителя (от 1 до 3 лет). На монтажные работы — наша гарантия 12 месяцев.</div></details>
+        <details class="faq-item"><summary>Работаете ли вы с государственными организациями?<svg class="faq-arrow" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary><div class="faq-answer">Да, у нас есть опыт работы с бюджетными организациями. Участвуем в тендерах и готовим документацию по 44-ФЗ и 223-ФЗ.</div></details>
+        <details class="faq-item"><summary>Можно ли модернизировать существующую систему?<svg class="faq-arrow" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary><div class="faq-answer">Да, мы часто модернизируем существующие системы: заменяем устаревшее оборудование, расширяем покрытие Wi-Fi, добавляем новые камеры к уже работающей системе.</div></details>
+        <details class="faq-item"><summary>Как быстро выезжаете на аварийные заявки?<svg class="faq-arrow" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></summary><div class="faq-answer">Для клиентов на абонентском обслуживании — выезд в течение 2 часов по Москве и области. Удалённая диагностика — в течение 30 минут после обращения.</div></details>
       </div>
     </div>
   </section>
@@ -380,20 +320,62 @@
   </a>
 </div>
 
-<script src="data/services.json"></script>
-<script src="js/cursor.js"></script>
+<!-- СКРИПТЫ -->
+<!-- Сначала загружаем данные, потом запускаем services.js -->
+<script>
+// Глобальные данные для услуг
+window.servicesData = null;
+
+// Загружаем JSON
+fetch('data/services.json')
+  .then(function(response) { return response.json(); })
+  .then(function(data) { 
+    window.servicesData = data;
+    // После загрузки данных запускаем services.js
+    var script = document.createElement('script');
+    script.src = 'js/services.js';
+    document.body.appendChild(script);
+  })
+  .catch(function(error) {
+    console.error('Ошибка загрузки услуг:', error);
+    // Всё равно запускаем services.js, он покажет ошибку
+    var script = document.createElement('script');
+    script.src = 'js/services.js';
+    document.body.appendChild(script);
+  });
+</script>
+
 <script src="js/services.js"></script>
+<script src="js/cursor.js"></script>
 <script src="js/target.js"></script>
 
 <script>
-// Индикатор прогресса скролла
 (function() {
+  // Индикатор прогресса скролла
   window.addEventListener('scroll', function() {
     var scrollTop = window.scrollY;
     var docHeight = document.documentElement.scrollHeight - window.innerHeight;
     var progress = (scrollTop / docHeight) * 100;
     document.body.style.setProperty('--scroll-progress', progress + '%');
   });
+  
+  // Бургер-меню
+  var burgerBtn = document.getElementById('burgerBtn');
+  var navLinks = document.getElementById('navLinks');
+  
+  if (burgerBtn && navLinks) {
+    burgerBtn.addEventListener('click', function() {
+      var expanded = navLinks.classList.toggle('active');
+      burgerBtn.setAttribute('aria-expanded', expanded);
+    });
+    
+    navLinks.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        navLinks.classList.remove('active');
+        burgerBtn.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
 })();
 </script>
 

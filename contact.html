@@ -48,9 +48,24 @@
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .form-submit { margin-top: 8px; }
     .form-submit .btn { width: 100%; text-align: center; }
+    .form-submit .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
     .form-success { display: none; text-align: center; padding: 40px 20px; }
     .form-success.visible { display: block; }
     .form-success-icon { font-size: 48px; margin-bottom: 16px; }
+    
+    .form-error {
+      display: none;
+      background: rgba(255, 68, 68, 0.1);
+      border: 1px solid rgba(255, 68, 68, 0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      color: #ff8888;
+      font-size: 13px;
+    }
+    .form-error.visible { display: block; }
+    
     .social-links { display: flex; gap: 16px; margin-top: 8px; }
     .social-link {
       width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.1);
@@ -60,11 +75,38 @@
     .social-link:hover { border-color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.05); color: #ffffff; }
     .map-container { margin-top: 60px; border-radius: 28px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); }
     .map-container iframe { width: 100%; height: 400px; border: none; filter: grayscale(100%) invert(92%) hue-rotate(180deg); }
+    
+    /* Тостер уведомления */
+    .toast-notification {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(0,0,0,0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50px;
+      padding: 12px 24px;
+      color: white;
+      font-size: 14px;
+      z-index: 10000;
+      transition: transform 0.3s ease;
+      white-space: nowrap;
+    }
+    .toast-notification.show {
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast-notification.error {
+      border-color: rgba(255,68,68,0.5);
+      background: rgba(255,68,68,0.2);
+    }
+    
     @media (max-width: 768px) {
       .contact-layout { grid-template-columns: 1fr; gap: 48px; }
       .contact-form-block { padding: 28px; }
       .form-row { grid-template-columns: 1fr; }
       .contact-page { padding-top: 110px; }
+      .toast-notification { white-space: normal; max-width: 90%; text-align: center; }
     }
   </style>
 </head>
@@ -142,15 +184,34 @@
           <h3 style="font-size: 24px; margin-bottom: 8px;">Оставить заявку</h3>
           <p style="margin-bottom: 32px; color: rgba(255,255,255,0.4); font-size: 14px;">Заполните форму, и мы свяжемся с вами в течение часа.</p>
           
-          <form id="contactForm" onsubmit="return handleSubmit(event)">
+          <div class="form-error" id="formError"></div>
+          
+          <form id="contactForm">
             <div class="form-row">
-              <div class="form-group"><label class="form-label" for="firstName">Имя *</label><input type="text" id="firstName" class="form-input" placeholder="Иван" required></div>
-              <div class="form-group"><label class="form-label" for="lastName">Фамилия</label><input type="text" id="lastName" class="form-input" placeholder="Иванов"></div>
+              <div class="form-group">
+                <label class="form-label" for="firstName">Имя *</label>
+                <input type="text" id="firstName" class="form-input" placeholder="Иван" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="lastName">Фамилия</label>
+                <input type="text" id="lastName" class="form-input" placeholder="Иванов">
+              </div>
             </div>
-            <div class="form-group"><label class="form-label" for="email">Email *</label><input type="email" id="email" class="form-input" placeholder="ivan@company.ru" required></div>
-            <div class="form-group"><label class="form-label" for="phone">Телефон *</label><input type="tel" id="phone" class="form-input" placeholder="+7 (912) 345-67-89" required></div>
-            <div class="form-group"><label class="form-label" for="message">Сообщение</label><textarea id="message" class="form-textarea" placeholder="Кратко опишите вашу задачу..."></textarea></div>
-            <div class="form-submit"><button type="submit" class="btn btn-primary">Отправить заявку</button></div>
+            <div class="form-group">
+              <label class="form-label" for="email">Email *</label>
+              <input type="email" id="email" class="form-input" placeholder="ivan@company.ru" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="phone">Телефон *</label>
+              <input type="tel" id="phone" class="form-input" placeholder="+7 (912) 345-67-89" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="message">Сообщение</label>
+              <textarea id="message" class="form-textarea" placeholder="Кратко опишите вашу задачу..."></textarea>
+            </div>
+            <div class="form-submit">
+              <button type="submit" class="btn btn-primary" id="submitBtn">Отправить заявку</button>
+            </div>
           </form>
           
           <div class="form-success" id="formSuccess">
@@ -165,41 +226,218 @@
 </main>
 
 <footer>
-  <div class="container footer">
+  <div class="container footer-bottom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
     <span>© 2025 ООО "Хейз Айти"</span>
     <span><a href="privacy-policy.html" style="color: rgba(255,255,255,0.4); text-decoration: none;">Политика конфиденциальности</a></span>
   </div>
 </footer>
 
 <script>
-  (function() {
-    const dot = document.querySelector('.cursor-dot');
-    const outline = document.querySelector('.cursor-outline');
-    if (dot && outline && window.innerWidth > 768) {
-      document.addEventListener('mousemove', (e) => {
-        dot.style.transform = `translate(${e.clientX - 3}px, ${e.clientY - 3}px)`;
-        outline.style.transform = `translate(${e.clientX - 20}px, ${e.clientY - 20}px)`;
+(function() {
+  // Кастомный курсор
+  const dot = document.querySelector('.cursor-dot');
+  const outline = document.querySelector('.cursor-outline');
+  if (dot && outline && window.matchMedia('(pointer: fine)').matches && window.innerWidth > 768) {
+    document.addEventListener('mousemove', (e) => {
+      dot.style.transform = `translate(${e.clientX - 3}px, ${e.clientY - 3}px)`;
+      outline.style.transform = `translate(${e.clientX - 20}px, ${e.clientY - 20}px)`;
+    });
+    const hoverElements = document.querySelectorAll('a, button, .btn, .contact-method, .social-link, .form-input, .form-textarea');
+    hoverElements.forEach(el => {
+      el.addEventListener('mouseenter', () => outline.classList.add('hover'));
+      el.addEventListener('mouseleave', () => outline.classList.remove('hover'));
+    });
+  } else if (dot && outline) {
+    dot.style.display = 'none';
+    outline.style.display = 'none';
+  }
+})();
+
+// ============ ФОРМА С ОТПРАВКОЙ В TELEGRAM ============
+(function() {
+  // ⚠️ ВСТАВЬТЕ СВОИ ДАННЫЕ ⚠️
+  const TELEGRAM_BOT_TOKEN = 'YOUR_BOT_TOKEN';  // Замените на токен вашего бота
+  const TELEGRAM_CHAT_ID = 'YOUR_CHAT_ID';     // Замените на ваш chat_id
+  
+  const form = document.getElementById('contactForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const formSuccess = document.getElementById('formSuccess');
+  const formError = document.getElementById('formError');
+  const formBlock = document.getElementById('contactFormBlock');
+  
+  // Функция показа тост-уведомления
+  function showToast(message, isError = false) {
+    const existingToast = document.querySelector('.toast-notification');
+    if (existingToast) existingToast.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification' + (isError ? ' error' : '');
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+  
+  // Валидация формы
+  function validateForm() {
+    const firstName = document.getElementById('firstName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    
+    if (!firstName) {
+      showToast('Пожалуйста, укажите имя', true);
+      return false;
+    }
+    
+    if (!email) {
+      showToast('Пожалуйста, укажите email', true);
+      return false;
+    }
+    
+    if (!/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/.test(email)) {
+      showToast('Введите корректный email', true);
+      return false;
+    }
+    
+    if (!phone) {
+      showToast('Пожалуйста, укажите телефон', true);
+      return false;
+    }
+    
+    return true;
+  }
+  
+  // Отправка в Telegram
+  async function sendToTelegram(formData) {
+    if (TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN' || TELEGRAM_CHAT_ID === 'YOUR_CHAT_ID') {
+      // Демо-режим, если не настроен бот
+      console.warn('Telegram бот не настроен, работаем в демо-режиме');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return { ok: true, demo: true };
+    }
+    
+    const message = `
+📋 *НОВАЯ ЗАЯВКА С САЙТА HAZE IT*
+
+👤 *Клиент:* ${formData.firstName} ${formData.lastName || ''}
+📧 *Email:* ${formData.email}
+📞 *Телефон:* ${formData.phone}
+💬 *Сообщение:* ${formData.message || 'не указано'}
+
+🕐 *Время:* ${new Date().toLocaleString('ru-RU')}
+    `;
+    
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: message,
+          parse_mode: 'Markdown'
+        })
       });
-      document.querySelectorAll('a, button, .btn, .contact-method, .social-link, .form-input, .form-textarea').forEach(el => {
-        el.addEventListener('mouseenter', () => outline.classList.add('hover'));
-        el.addEventListener('mouseleave', () => outline.classList.remove('hover'));
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Ошибка отправки:', error);
+      throw error;
+    }
+  }
+  
+  // Сохранение в localStorage при ошибке
+  function saveToLocalStorage(formData) {
+    const pending = JSON.parse(localStorage.getItem('pending_forms') || '[]');
+    pending.push({ ...formData, timestamp: Date.now() });
+    localStorage.setItem('pending_forms', JSON.stringify(pending));
+  }
+  
+  // Обработка отправки формы
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    const formData = {
+      firstName: document.getElementById('firstName').value.trim(),
+      lastName: document.getElementById('lastName').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      message: document.getElementById('message').value.trim()
+    };
+    
+    // Блокируем кнопку
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Отправка...';
+    formError.classList.remove('visible');
+    
+    try {
+      const result = await sendToTelegram(formData);
+      
+      if (result.ok || result.demo) {
+        // Успех
+        form.style.display = 'none';
+        formSuccess.classList.add('visible');
+        showToast('✅ Заявка успешно отправлена! Мы свяжемся с вами.');
+        
+        // Очищаем localStorage от этой заявки, если была сохранена
+        const pending = JSON.parse(localStorage.getItem('pending_forms') || '[]');
+        const filtered = pending.filter(p => p.email !== formData.email || p.phone !== formData.phone);
+        localStorage.setItem('pending_forms', JSON.stringify(filtered));
+      } else {
+        throw new Error(result.description || 'Ошибка отправки');
+      }
+    } catch (error) {
+      console.error('Ошибка:', error);
+      
+      // Сохраняем заявку локально
+      saveToLocalStorage(formData);
+      
+      formError.textContent = '⚠️ Не удалось отправить заявку. Данные сохранены локально, мы свяжемся с вами в ближайшее время.';
+      formError.classList.add('visible');
+      showToast('⚠️ Ошибка отправки, но данные сохранены. Мы с вами свяжемся!', true);
+      
+      // В демо-режиме показываем успех, даже если бот не настроен
+      if (TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN') {
+        form.style.display = 'none';
+        formSuccess.classList.add('visible');
+      }
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Отправить заявку';
+    }
+  });
+  
+  // Попытка отправить сохранённые заявки при загрузке
+  function retryPendingForms() {
+    const pending = JSON.parse(localStorage.getItem('pending_forms') || '[]');
+    if (pending.length > 0 && TELEGRAM_BOT_TOKEN !== 'YOUR_BOT_TOKEN') {
+      showToast(`📦 Есть ${pending.length} неотправленных заявок, пробуем отправить...`);
+      
+      pending.forEach(async (formData, index) => {
+        try {
+          await sendToTelegram(formData);
+          // Удаляем успешно отправленную
+          const updated = JSON.parse(localStorage.getItem('pending_forms') || '[]');
+          const filtered = updated.filter((_, i) => i !== index);
+          localStorage.setItem('pending_forms', JSON.stringify(filtered));
+          showToast(`✅ Заявка от ${formData.firstName} отправлена!`);
+        } catch (e) {
+          console.log('Повторная отправка не удалась');
+        }
       });
     }
-  })();
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    const form = document.getElementById('contactForm');
-    const success = document.getElementById('formSuccess');
-    const btn = form.querySelector('button[type="submit"]');
-    btn.textContent = 'Отправка...';
-    btn.disabled = true;
-    setTimeout(() => {
-      form.style.display = 'none';
-      success.classList.add('visible');
-    }, 1200);
-    return false;
   }
+  
+  retryPendingForms();
+})();
 </script>
 
 </body>
