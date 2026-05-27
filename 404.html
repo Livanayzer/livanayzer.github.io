@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>404 — Страница не найдена | HAZE IT</title>
+  <meta name="description" content="Страница не найдена. Вернитесь на главную или свяжитесь с нами.">
+  
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    .error-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 40px;
+    }
+    
+    .error-content {
+      max-width: 600px;
+    }
+    
+    .error-code {
+      font-size: clamp(120px, 20vw, 200px);
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 8px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      user-select: none;
+    }
+    
+    .error-glitch {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .error-glitch::before,
+    .error-glitch::after {
+      content: '404';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .error-glitch::before {
+      animation: glitchTop 2s infinite linear alternate-reverse;
+      clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+    }
+    
+    .error-glitch::after {
+      animation: glitchBottom 2.5s infinite linear alternate-reverse;
+      clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+    }
+    
+    @keyframes glitchTop {
+      0%, 100% { transform: translate(0); }
+      33% { transform: translate(-3px, -2px); }
+      66% { transform: translate(3px, 1px); }
+    }
+    
+    @keyframes glitchBottom {
+      0%, 100% { transform: translate(0); }
+      33% { transform: translate(2px, 2px); }
+      66% { transform: translate(-2px, -1px); }
+    }
+    
+    .error-title {
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    
+    .error-description {
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 40px;
+      font-size: 16px;
+    }
+    
+    .error-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .error-illustration {
+      margin-bottom: 40px;
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .error-circle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .error-circle:nth-child(1) { width: 120px; height: 120px; animation: rotate 20s linear infinite; }
+    .error-circle:nth-child(2) { width: 90px; height: 90px; animation: rotate 15s linear infinite reverse; }
+    .error-circle:nth-child(3) { width: 60px; height: 60px; animation: rotate 10s linear infinite; }
+    
+    .error-x {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 40px;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    @keyframes rotate {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    @media (max-width: 768px) {
+      .error-page { padding: 100px 24px; }
+      .error-actions { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor-dot" aria-hidden="true"></div>
+<div class="cursor-outline" aria-hidden="true"></div>
+
+<div class="bg-animation" aria-hidden="true">
+  <div class="bg-grid"></div>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+</div>
+
+<header class="header">
+  <div class="container header-inner">
+    <a href="index.html" class="logo-container" aria-label="HAZE IT — на главную">
+      <img src="logo.png" alt="HAZE IT" class="logo-image" width="40" height="40">
+      <span class="logo-text">HAZE IT</span>
+    </a>
+    <nav class="nav-links" aria-label="Основная навигация">
+      <a href="index.html#services">Услуги</a>
+      <a href="index.html#cases">Проекты</a>
+      <a href="contact.html">Контакты</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="error-page">
+    <div class="error-content">
+      <div class="error-illustration" aria-hidden="true">
+        <div class="error-circle"></div>
+        <div class="error-circle"></div>
+        <div class="error-circle"></div>
+        <div class="error-x">×</div>
+      </div>
+      
+      <div class="error-glitch">
+        <span class="error-code">404</span>
+      </div>
+      
+      <h1 class="error-title">Страница не найдена</h1>
+      <p class="error-description">Возможно, она была перемещена, удалена или вы набрали неправильный адрес. Давайте вернёмся на главную и начнём заново.</p>
+      
+      <div class="error-actions">
+        <a href="index.html" class="btn btn-primary">На главную</a>
+        <a href="contact.html" class="btn btn-secondary">Связаться с нами</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container footer">
+    <span>© 2025 ООО "Хейз Айти"</span>
+    <span><a href="privacy-policy.html" style="color: rgba(255,255,255,0.4); text-decoration: none;">Политика конфиденциальности</a></span>
+  </div>
+</footer>
+
+<script>
+  (function() {
+    const dot = document.querySelector('.cursor-dot');
+    const outline = document.querySelector('.cursor-outline');
+    if (dot && outline && window.innerWidth > 768) {
+      document.addEventListener('mousemove', (e) => {
+        dot.style.transform = `translate(${e.clientX - 3}px, ${e.clientY - 3}px)`;
+        outline.style.transform = `translate(${e.clientX - 20}px, ${e.clientY - 20}px)`;
+      });
+      document.querySelectorAll('a, button, .btn').forEach(el => {
+        el.addEventListener('mouseenter', () => outline.classList.add('hover'));
+        el.addEventListener('mouseleave', () => outline.classList.remove('hover'));
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>
