@@ -29,8 +29,7 @@
 <header class="header">
   <div class="container header-inner">
     <a href="/" class="logo-container" aria-label="HAZE IT — на главную">
-      <img src="logo.png" alt="HAZE IT" class="logo-image" width="40" height="40">
-      <span class="logo-text">HAZE IT</span>
+        <img src="logo.png" alt="HAZE IT" class="logo-image" width="56" height="56">
     </a>
     <nav class="nav-links" aria-label="Основная навигация">
       <a href="#services">Услуги</a>
@@ -385,6 +384,18 @@
 <script src="js/cursor.js"></script>
 <script src="js/services.js"></script>
 <script src="js/target.js"></script>
+
+<script>
+// Индикатор прогресса скролла
+(function() {
+  window.addEventListener('scroll', function() {
+    var scrollTop = window.scrollY;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var progress = (scrollTop / docHeight) * 100;
+    document.body.style.setProperty('--scroll-progress', progress + '%');
+  });
+})();
+</script>
 
 </body>
 </html>
