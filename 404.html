@@ -203,22 +203,7 @@
   </div>
 </footer>
 
-<script>
-  (function() {
-    const dot = document.querySelector('.cursor-dot');
-    const outline = document.querySelector('.cursor-outline');
-    if (dot && outline && window.innerWidth > 768) {
-      document.addEventListener('mousemove', (e) => {
-        dot.style.transform = `translate(${e.clientX - 3}px, ${e.clientY - 3}px)`;
-        outline.style.transform = `translate(${e.clientX - 20}px, ${e.clientY - 20}px)`;
-      });
-      document.querySelectorAll('a, button, .btn').forEach(el => {
-        el.addEventListener('mouseenter', () => outline.classList.add('hover'));
-        el.addEventListener('mouseleave', () => outline.classList.remove('hover'));
-      });
-    }
-  })();
-</script>
+<script src="js/cursor.js"></script>
 
 </body>
 </html>
