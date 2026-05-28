@@ -14,7 +14,7 @@
     return;
   }
 
-  // Используем requestAnimationFrame для плавности
+  // requestAnimationFrame для плавности
   var rafId = null;
   var mouseX = 0, mouseY = 0;
   
@@ -37,30 +37,29 @@
   
   document.addEventListener('mousemove', onMouseMove);
   
-  // Hover эффекты
-  var hoverSelectors = 'a, button, .btn, .service-card, .tab-btn, .case-card, .tech-item, .blog-card, .guarantee-card, .faq-item summary, .floating-btn, .social-link, .contact-method';
+  // Hover эффекты через делегирование (без MutationObserver!)
+  var hoverSelector = 'a, button, .btn, .service-card, .tab-btn, .case-card, .tech-item, .blog-card, .guarantee-card, .faq-item summary, .floating-btn, .social-link, .contact-method';
   
-  function addHoverListeners() {
-    var elements = document.querySelectorAll(hoverSelectors);
-    elements.forEach(function(el) {
-      el.addEventListener('mouseenter', function() { 
-        if (outline) outline.classList.add('hover'); 
-      });
-      el.addEventListener('mouseleave', function() { 
-        if (outline) outline.classList.remove('hover'); 
-      });
-    });
-  }
-  
-  // Добавляем слушатели при загрузке и при динамическом добавлении элементов
-  addHoverListeners();
-  
-  // Наблюдаем за изменениями в DOM (для динамически добавленных элементов)
-  var observer = new MutationObserver(function() {
-    addHoverListeners();
+  document.addEventListener('mouseover', function(e) {
+    var target = e.target;
+    // Ищем ближайший подходящий элемент
+    var hoverTarget = target.closest(hoverSelector);
+    if (hoverTarget && outline) {
+      outline.classList.add('hover');
+    }
   });
   
-  observer.observe(document.body, { childList: true, subtree: true });
+  document.addEventListener('mouseout', function(e) {
+    var target = e.target;
+    var hoverTarget = target.closest(hoverSelector);
+    if (hoverTarget && outline) {
+      // Проверяем, не переместился ли курсор на другой hover-элемент
+      var relatedTarget = e.relatedTarget;
+      if (!relatedTarget || !relatedTarget.closest(hoverSelector)) {
+        outline.classList.remove('hover');
+      }
+    }
+  });
   
   // Скрываем курсор при выходе за пределы окна
   document.addEventListener('mouseleave', function() {

@@ -710,10 +710,9 @@ body::after {
 /* ===== HAZE SYSTEM BOOT — НОРМАЛЬНЫЙ РАЗМЕР ===== */
 
 /* Хедер — обрезаем всё, что выходит за пределы */
-.header {
-  overflow: hidden;  /* ← КЛЮЧЕВОЕ: обрезает вылезающие кольца */
+.header-inner {
+  overflow: hidden;  /* переносим с .header на .header-inner */
 }
-
 .logo-container {
   position: relative;
   display: inline-flex;
@@ -815,5 +814,557 @@ body::after {
     width: 160px;
     height: 160px;
     opacity: 0;
+  }
+}
+
+
+/* ===== ПОЛНАЯ МОБИЛЬНАЯ АДАПТАЦИЯ (до 768px) ===== */
+@media (max-width: 768px) {
+  
+  /* Общие отступы */
+  .container {
+    padding: 0 20px;
+  }
+  
+  /* Хедер — компактный */
+  .header {
+    height: 64px;
+  }
+  
+  .header-inner {
+    height: 64px;
+  }
+  
+  /* Логотип на мобильных — уменьшаем анимацию */
+  .logo-container {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .logo-ring.r1 { inset: -4px; }
+  .logo-ring.r2 { inset: 2px; }
+  .logo-ring.r3 { inset: 8px; }
+  
+  .logo-container .logo-image {
+    width: 44px;
+  }
+  
+  /* Упрощаем анимацию на мобильных для производительности */
+  .logo-ring {
+    animation-duration: 0s !important;
+    opacity: 0.3;
+  }
+  
+  .logo-scan {
+    display: none;
+  }
+  
+  /* Hero секция */
+  .hero {
+    min-height: auto;
+    padding: 100px 0 60px;
+  }
+  
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    text-align: center;
+  }
+  
+  .hero-text h1 {
+    font-size: clamp(36px, 8vw, 48px);
+    margin-bottom: 16px;
+  }
+  
+  .hero-text p {
+    font-size: 15px;
+  }
+  
+  .hero-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .hero-actions .btn {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+  
+  /* Мишень на мобильных */
+  .hero-visual {
+    width: 280px;
+    height: 280px;
+    margin: 0 auto;
+  }
+  
+  .target-combo {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  
+  /* Сетки — везде 1 колонка */
+  .services-grid,
+  .guarantees-grid,
+  .cases-grid,
+  .blog-grid,
+  .datamobile-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  /* Карточки услуг */
+  .service-card {
+    padding: 24px 20px;
+  }
+  
+  .service-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .service-card h3 {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+  
+  /* Вкладки в услугах — скролл по горизонтали */
+  .tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .tab-btn {
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+  
+  .tab-panel li {
+    font-size: 13px;
+  }
+  
+  /* Гарантии */
+  .guarantee-card {
+    padding: 24px;
+  }
+  
+  .guarantee-icon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .guarantee-card h3 {
+    font-size: 18px;
+  }
+  
+  .guarantee-card p {
+    font-size: 13px;
+  }
+  
+  /* Timeline */
+  .timeline {
+    padding-left: 20px;
+  }
+  
+  .timeline-item::before {
+    left: -27px;
+    width: 8px;
+    height: 8px;
+  }
+  
+  .timeline-item h3 {
+    font-size: 16px;
+  }
+  
+  .timeline-item p {
+    font-size: 13px;
+  }
+  
+  /* Кейсы */
+  .case-card {
+    padding: 24px;
+  }
+  
+  .case-tag {
+    font-size: 10px;
+  }
+  
+  .case-card h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  
+  .case-card p {
+    font-size: 13px;
+  }
+  
+  /* FAQ */
+  .faq-item summary {
+    font-size: 15px;
+  }
+  
+  .faq-answer {
+    font-size: 13px;
+  }
+  
+  /* Блог */
+  .blog-card {
+    padding: 20px;
+  }
+  
+  .blog-card h3 {
+    font-size: 16px;
+  }
+  
+  .blog-card p {
+    font-size: 13px;
+  }
+  
+  /* Технологии */
+  .tech-list {
+    gap: 16px;
+  }
+  
+  .tech-item {
+    font-size: 16px;
+  }
+  
+  /* CTA секция */
+  .cta-section {
+    padding: 48px 24px;
+  }
+  
+  .cta-section h2 {
+    font-size: 28px;
+  }
+  
+  .cta-section p {
+    font-size: 14px;
+  }
+  
+  .contact-info {
+    font-size: 13px;
+  }
+  
+  /* Футер */
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    text-align: center;
+  }
+  
+  .footer-col {
+    text-align: center;
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  /* Плавающие кнопки */
+  .floating-actions {
+    bottom: 16px;
+    right: 16px;
+    gap: 10px;
+  }
+  
+  .floating-btn {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .floating-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .floating-label {
+    display: none;  /* на мобильных не показываем подписи */
+  }
+  
+  /* Partner badge */
+  .partner-badge {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+    gap: 16px;
+  }
+  
+  .partner-badge-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .partner-badge-title {
+    font-size: 15px;
+  }
+  
+  .partner-badge-subtitle {
+    font-size: 12px;
+  }
+  
+  .partner-logo {
+    height: 32px;
+  }
+  
+  /* Карточки DataMobile */
+  .dm-card {
+    padding: 20px;
+  }
+  
+  .dm-card-header h3 {
+    font-size: 16px;
+  }
+  
+  .dm-version-name,
+  .dm-version-price {
+    font-size: 12px;
+  }
+  
+  .dm-module {
+    font-size: 10px;
+  }
+  
+  .dm-footer-note p {
+    font-size: 11px;
+  }
+  
+  /* Курсор — отключаем на мобильных */
+  .cursor-dot,
+  .cursor-outline {
+    display: none !important;
+  }
+  
+  body,
+  a,
+  button,
+  .btn,
+  .service-card,
+  .tab-btn,
+  .case-card,
+  .tech-item,
+  .blog-card,
+  .guarantee-card,
+  .faq-item summary {
+    cursor: auto !important;
+  }
+  
+  /* Отступы между секциями */
+  section {
+    padding: 60px 0;
+  }
+  
+  .section-title {
+    font-size: 12px;
+    margin-bottom: 24px;
+  }
+  
+  h2 {
+    font-size: 28px;
+  }
+}
+
+/* ===== ДЛЯ ОЧЕНЬ МАЛЕНЬКИХ ЭКРАНОВ (до 480px) ===== */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 16px;
+  }
+  
+  .hero-visual {
+    width: 240px;
+    height: 240px;
+  }
+  
+  .btn {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+  
+  .service-card {
+    padding: 20px 16px;
+  }
+  
+  .service-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .service-card h3 {
+    font-size: 18px;
+  }
+  
+  .floating-actions {
+    bottom: 12px;
+    right: 12px;
+    gap: 8px;
+  }
+  
+  .floating-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+
+
+
+
+
+
+/* ===== СЕТЕВОЙ ВИДЖЕТ HAZE NETINFO ===== */
+.haze-netinfo {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 999;
+  width: 280px;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  font-family: 'Inter', monospace;
+  font-size: 11px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: netinfoAppear 0.5s ease forwards;
+  animation-delay: 1.8s;
+  transition: all 0.3s ease;
+}
+
+@keyframes netinfoAppear {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.haze-netinfo:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.netinfo-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px 12px 0 0;
+  cursor: pointer;
+}
+
+.netinfo-icon {
+  font-size: 14px;
+}
+
+.netinfo-title {
+  flex: 1;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.netinfo-toggle {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.netinfo-toggle:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.netinfo-body {
+  padding: 10px 12px;
+  max-height: 260px;
+  overflow-y: auto;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+/* Свёрнутое состояние */
+.haze-netinfo.minimized .netinfo-body {
+  max-height: 0;
+  padding: 0 12px;
+  overflow: hidden;
+}
+
+.netinfo-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 10px;
+}
+
+.netinfo-row:last-child {
+  border-bottom: none;
+}
+
+.netinfo-label {
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 400;
+}
+
+.netinfo-value {
+  color: #00ff88;
+  font-family: monospace;
+  text-align: right;
+  word-break: break-word;
+  max-width: 60%;
+}
+
+.netinfo-secure .netinfo-value {
+  color: #ffaa44;
+}
+
+/* Скроллбар */
+.netinfo-body::-webkit-scrollbar {
+  width: 3px;
+}
+
+.netinfo-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.netinfo-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 136, 0.3);
+  border-radius: 3px;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+  .haze-netinfo {
+    bottom: 10px;
+    left: 10px;
+    width: 240px;
+    transform: scale(0.95);
+    transform-origin: bottom left;
+  }
+  
+  .netinfo-body {
+    max-height: 220px;
+  }
+  
+  .netinfo-row {
+    font-size: 9px;
+    padding: 5px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .haze-netinfo {
+    width: 210px;
   }
 }

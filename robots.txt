@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /privacy-policy.html
+Disallow: /404.html
+
+Sitemap: https://hazeit.ru/sitemap.xml
+Host: https://hazeit.ru

@@ -125,7 +125,7 @@
   <div class="container header-inner">
     <a href="index.html" class="logo-container" aria-label="HAZE IT — на главную">
       <img src="logo.png" alt="HAZE IT" class="logo-image" width="40" height="40">
-      <span class="logo-text">HAZE IT</span>
+      <span class="logo-text"></span>
     </a>
     <nav class="nav-links" aria-label="Основная навигация">
       <a href="index.html#services">Услуги</a>
@@ -227,7 +227,7 @@
 
 <footer>
   <div class="container footer-bottom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-    <span>© 2025 ООО "Хейз Айти"</span>
+    <span>© 2026 ООО "Хейз Айти"</span>
     <span><a href="privacy-policy.html" style="color: rgba(255,255,255,0.4); text-decoration: none;">Политика конфиденциальности</a></span>
   </div>
 </footer>
@@ -313,12 +313,45 @@
   }
   
   // Отправка в Telegram
-  async function sendToTelegram(formData) {
+  // Безопасная отправка в Telegram
+    async function sendToTelegram(formData) {
     if (TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN' || TELEGRAM_CHAT_ID === 'YOUR_CHAT_ID') {
-      // Демо-режим, если не настроен бот
-      console.warn('Telegram бот не настроен, работаем в демо-режиме');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return { ok: true, demo: true };
+        // Демо-режим — только информационное сообщение, без данных
+        console.log('📋 Демо-режим: заявка обработана локально');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return { ok: true, demo: true };
+    }
+    
+    const message = `
+    📋 *НОВАЯ ЗАЯВКА С САЙТА HAZE IT*
+
+    👤 *Клиент:* ${formData.firstName} ${formData.lastName || ''}
+    📧 *Email:* ${formData.email}
+    📞 *Телефон:* ${formData.phone}
+    💬 *Сообщение:* ${formData.message || 'не указано'}
+
+    🕐 *Время:* ${new Date().toLocaleString('ru-RU')}
+    `;
+    
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    
+    try {
+        const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: message,
+            parse_mode: 'Markdown'
+        })
+        });
+        
+        return await response.json();
+    } catch (error) {
+        // ✅ Не раскрываем URL, токен и данные
+        console.error('Ошибка сети при отправке заявки');
+        throw error;
+    }
     }
     
     const message = `
