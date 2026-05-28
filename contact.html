@@ -233,172 +233,161 @@
 </footer>
 
 <script>
+// ============ КАСТОМНЫЙ КУРСОР ============
 (function() {
-  // Кастомный курсор
-  const dot = document.querySelector('.cursor-dot');
-  const outline = document.querySelector('.cursor-outline');
-  if (dot && outline && window.matchMedia('(pointer: fine)').matches && window.innerWidth > 768) {
-    document.addEventListener('mousemove', (e) => {
-      dot.style.transform = `translate(${e.clientX - 3}px, ${e.clientY - 3}px)`;
-      outline.style.transform = `translate(${e.clientX - 20}px, ${e.clientY - 20}px)`;
-    });
-    const hoverElements = document.querySelectorAll('a, button, .btn, .contact-method, .social-link, .form-input, .form-textarea');
-    hoverElements.forEach(el => {
-      el.addEventListener('mouseenter', () => outline.classList.add('hover'));
-      el.addEventListener('mouseleave', () => outline.classList.remove('hover'));
-    });
-  } else if (dot && outline) {
+  var dot = document.querySelector('.cursor-dot');
+  var outline = document.querySelector('.cursor-outline');
+  
+  if (!dot || !outline) return;
+  
+  var isFinePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+  var isNotTouch = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+  
+  if (!isFinePointer || !isNotTouch || window.innerWidth <= 768) {
     dot.style.display = 'none';
     outline.style.display = 'none';
+    return;
   }
+
+  var rafId = null;
+  var mouseX = 0, mouseY = 0;
+  
+  function updateCursor() {
+    dot.style.transform = 'translate(' + (mouseX - 3) + 'px, ' + (mouseY - 3) + 'px)';
+    outline.style.transform = 'translate(' + (mouseX - 20) + 'px, ' + (mouseY - 20) + 'px)';
+    rafId = null;
+  }
+  
+  document.addEventListener('mousemove', function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    if (rafId === null) {
+      rafId = requestAnimationFrame(updateCursor);
+    }
+  });
+  
+  var hoverSelector = 'a, button, .btn, .contact-method, .social-link, .form-input, .form-textarea';
+  
+  document.addEventListener('mouseover', function(e) {
+    if (e.target.closest(hoverSelector) && outline) {
+      outline.classList.add('hover');
+    }
+  });
+  
+  document.addEventListener('mouseout', function(e) {
+    if (e.target.closest(hoverSelector) && outline) {
+      var related = e.relatedTarget;
+      if (!related || !related.closest(hoverSelector)) {
+        outline.classList.remove('hover');
+      }
+    }
+  });
+  
+  document.addEventListener('mouseleave', function() {
+    if (dot) dot.style.opacity = '0';
+    if (outline) outline.style.opacity = '0';
+  });
+  
+  document.addEventListener('mouseenter', function() {
+    if (dot) dot.style.opacity = '1';
+    if (outline) outline.style.opacity = '1';
+  });
 })();
 
 // ============ ФОРМА С ОТПРАВКОЙ В TELEGRAM ============
 (function() {
-  // ⚠️ ВСТАВЬТЕ СВОИ ДАННЫЕ ⚠️
-  const TELEGRAM_BOT_TOKEN = 'YOUR_BOT_TOKEN';  // Замените на токен вашего бота
-  const TELEGRAM_CHAT_ID = 'YOUR_CHAT_ID';     // Замените на ваш chat_id
+  // ⚠️ ЗАМЕНИТЕ НА РЕАЛЬНЫЕ ДАННЫЕ ⚠️
+  var TELEGRAM_BOT_TOKEN = 'YOUR_BOT_TOKEN';
+  var TELEGRAM_CHAT_ID = 'YOUR_CHAT_ID';
   
-  const form = document.getElementById('contactForm');
-  const submitBtn = document.getElementById('submitBtn');
-  const formSuccess = document.getElementById('formSuccess');
-  const formError = document.getElementById('formError');
-  const formBlock = document.getElementById('contactFormBlock');
+  var form = document.getElementById('contactForm');
+  if (!form) return; // ← не ломаем страницу, если формы нет
   
-  // Функция показа тост-уведомления
-  function showToast(message, isError = false) {
-    const existingToast = document.querySelector('.toast-notification');
+  var submitBtn = document.getElementById('submitBtn');
+  var formSuccess = document.getElementById('formSuccess');
+  var formError = document.getElementById('formError');
+  
+  // Тостер
+  function showToast(message, isError) {
+    var existingToast = document.querySelector('.toast-notification');
     if (existingToast) existingToast.remove();
     
-    const toast = document.createElement('div');
+    var toast = document.createElement('div');
     toast.className = 'toast-notification' + (isError ? ' error' : '');
     toast.textContent = message;
     document.body.appendChild(toast);
     
-    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(function() { toast.classList.add('show'); }, 10);
     
-    setTimeout(() => {
+    setTimeout(function() {
       toast.classList.remove('show');
-      setTimeout(() => toast.remove(), 300);
+      setTimeout(function() { toast.remove(); }, 300);
     }, 3000);
   }
   
-  // Валидация формы
+  // Валидация
   function validateForm() {
-    const firstName = document.getElementById('firstName').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const phone = document.getElementById('phone').value.trim();
+    var firstName = document.getElementById('firstName').value.trim();
+    var email = document.getElementById('email').value.trim();
+    var phone = document.getElementById('phone').value.trim();
     
-    if (!firstName) {
-      showToast('Пожалуйста, укажите имя', true);
-      return false;
-    }
-    
-    if (!email) {
-      showToast('Пожалуйста, укажите email', true);
-      return false;
-    }
-    
+    if (!firstName) { showToast('Пожалуйста, укажите имя', true); return false; }
+    if (!email) { showToast('Пожалуйста, укажите email', true); return false; }
     if (!/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/.test(email)) {
       showToast('Введите корректный email', true);
       return false;
     }
-    
-    if (!phone) {
-      showToast('Пожалуйста, укажите телефон', true);
-      return false;
-    }
+    if (!phone) { showToast('Пожалуйста, укажите телефон', true); return false; }
     
     return true;
   }
   
   // Отправка в Telegram
-  // Безопасная отправка в Telegram
-    async function sendToTelegram(formData) {
+  function sendToTelegram(formData) {
     if (TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN' || TELEGRAM_CHAT_ID === 'YOUR_CHAT_ID') {
-        // Демо-режим — только информационное сообщение, без данных
-        console.log('📋 Демо-режим: заявка обработана локально');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return { ok: true, demo: true };
-    }
-    
-    const message = `
-    📋 *НОВАЯ ЗАЯВКА С САЙТА HAZE IT*
-
-    👤 *Клиент:* ${formData.firstName} ${formData.lastName || ''}
-    📧 *Email:* ${formData.email}
-    📞 *Телефон:* ${formData.phone}
-    💬 *Сообщение:* ${formData.message || 'не указано'}
-
-    🕐 *Время:* ${new Date().toLocaleString('ru-RU')}
-    `;
-    
-    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-    
-    try {
-        const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            chat_id: TELEGRAM_CHAT_ID,
-            text: message,
-            parse_mode: 'Markdown'
-        })
-        });
-        
-        return await response.json();
-    } catch (error) {
-        // ✅ Не раскрываем URL, токен и данные
-        console.error('Ошибка сети при отправке заявки');
-        throw error;
-    }
-    }
-    
-    const message = `
-📋 *НОВАЯ ЗАЯВКА С САЙТА HAZE IT*
-
-👤 *Клиент:* ${formData.firstName} ${formData.lastName || ''}
-📧 *Email:* ${formData.email}
-📞 *Телефон:* ${formData.phone}
-💬 *Сообщение:* ${formData.message || 'не указано'}
-
-🕐 *Время:* ${new Date().toLocaleString('ru-RU')}
-    `;
-    
-    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-    
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: message,
-          parse_mode: 'Markdown'
-        })
+      console.log('Демо-режим: заявка обработана локально');
+      return new Promise(function(resolve) {
+        setTimeout(function() { resolve({ ok: true, demo: true }); }, 1000);
       });
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Ошибка отправки:', error);
-      throw error;
     }
+    
+    var message = '\uD83D\uDCCB *НОВАЯ ЗАЯВКА С САЙТА HAZE IT*\n\n' +
+      '\uD83D\uDC64 *Клиент:* ' + formData.firstName + ' ' + (formData.lastName || '') + '\n' +
+      '\uD83D\uDCE7 *Email:* ' + formData.email + '\n' +
+      '\uD83D\uDCDE *Телефон:* ' + formData.phone + '\n' +
+      '\uD83D\uDCAC *Сообщение:* ' + (formData.message || 'не указано') + '\n\n' +
+      '\uD83D\uDD50 *Время:* ' + new Date().toLocaleString('ru-RU');
+    
+    var url = 'https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage';
+    
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: message,
+        parse_mode: 'Markdown'
+      })
+    }).then(function(response) {
+      return response.json();
+    });
   }
   
-  // Сохранение в localStorage при ошибке
+  // Сохранение в localStorage
   function saveToLocalStorage(formData) {
-    const pending = JSON.parse(localStorage.getItem('pending_forms') || '[]');
-    pending.push({ ...formData, timestamp: Date.now() });
-    localStorage.setItem('pending_forms', JSON.stringify(pending));
+    var pending = [];
+    try { pending = JSON.parse(localStorage.getItem('pending_forms') || '[]'); } catch(e) {}
+    pending.push({ firstName: formData.firstName, lastName: formData.lastName, email: formData.email, phone: formData.phone, message: formData.message, timestamp: Date.now() });
+    try { localStorage.setItem('pending_forms', JSON.stringify(pending)); } catch(e) {}
   }
   
-  // Обработка отправки формы
-  form.addEventListener('submit', async (e) => {
+  // Отправка формы
+  form.addEventListener('submit', function(e) {
     e.preventDefault();
     
     if (!validateForm()) return;
     
-    const formData = {
+    var formData = {
       firstName: document.getElementById('firstName').value.trim(),
       lastName: document.getElementById('lastName').value.trim(),
       email: document.getElementById('email').value.trim(),
@@ -406,70 +395,66 @@
       message: document.getElementById('message').value.trim()
     };
     
-    // Блокируем кнопку
     submitBtn.disabled = true;
     submitBtn.textContent = 'Отправка...';
     formError.classList.remove('visible');
     
-    try {
-      const result = await sendToTelegram(formData);
-      
-      if (result.ok || result.demo) {
-        // Успех
-        form.style.display = 'none';
-        formSuccess.classList.add('visible');
-        showToast('✅ Заявка успешно отправлена! Мы свяжемся с вами.');
+    sendToTelegram(formData)
+      .then(function(result) {
+        if (result.ok || result.demo) {
+          form.style.display = 'none';
+          formSuccess.classList.add('visible');
+          showToast('\u2705 Заявка успешно отправлена! Мы свяжемся с вами.');
+        } else {
+          throw new Error(result.description || 'Ошибка отправки');
+        }
+      })
+      .catch(function(error) {
+        console.error('Не удалось отправить заявку. Данные сохранены локально.');
         
-        // Очищаем localStorage от этой заявки, если была сохранена
-        const pending = JSON.parse(localStorage.getItem('pending_forms') || '[]');
-        const filtered = pending.filter(p => p.email !== formData.email || p.phone !== formData.phone);
-        localStorage.setItem('pending_forms', JSON.stringify(filtered));
-      } else {
-        throw new Error(result.description || 'Ошибка отправки');
-      }
-    } catch (error) {
-      console.error('Ошибка:', error);
-      
-      // Сохраняем заявку локально
-      saveToLocalStorage(formData);
-      
-      formError.textContent = '⚠️ Не удалось отправить заявку. Данные сохранены локально, мы свяжемся с вами в ближайшее время.';
-      formError.classList.add('visible');
-      showToast('⚠️ Ошибка отправки, но данные сохранены. Мы с вами свяжемся!', true);
-      
-      // В демо-режиме показываем успех, даже если бот не настроен
-      if (TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN') {
-        form.style.display = 'none';
-        formSuccess.classList.add('visible');
-      }
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Отправить заявку';
-    }
+        saveToLocalStorage(formData);
+        
+        formError.textContent = '\u26A0\uFE0F Не удалось отправить заявку. Данные сохранены локально, мы свяжемся с вами в ближайшее время.';
+        formError.classList.add('visible');
+        showToast('\u26A0\uFE0F Ошибка отправки, но данные сохранены. Мы с вами свяжемся!', true);
+        
+        if (TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN') {
+          form.style.display = 'none';
+          formSuccess.classList.add('visible');
+        }
+      })
+      .finally(function() {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Отправить заявку';
+      });
   });
   
-  // Попытка отправить сохранённые заявки при загрузке
-  function retryPendingForms() {
-    const pending = JSON.parse(localStorage.getItem('pending_forms') || '[]');
+  // Повторная отправка сохранённых заявок
+  (function retryPending() {
+    var pending = [];
+    try { pending = JSON.parse(localStorage.getItem('pending_forms') || '[]'); } catch(e) {}
+    
     if (pending.length > 0 && TELEGRAM_BOT_TOKEN !== 'YOUR_BOT_TOKEN') {
-      showToast(`📦 Есть ${pending.length} неотправленных заявок, пробуем отправить...`);
+      showToast('\uD83D\uDCE6 Есть ' + pending.length + ' неотправленных заявок, пробуем отправить...');
       
-      pending.forEach(async (formData, index) => {
-        try {
-          await sendToTelegram(formData);
-          // Удаляем успешно отправленную
-          const updated = JSON.parse(localStorage.getItem('pending_forms') || '[]');
-          const filtered = updated.filter((_, i) => i !== index);
-          localStorage.setItem('pending_forms', JSON.stringify(filtered));
-          showToast(`✅ Заявка от ${formData.firstName} отправлена!`);
-        } catch (e) {
-          console.log('Повторная отправка не удалась');
-        }
-      });
+      function processNext(index) {
+        if (index >= pending.length) return;
+        
+        sendToTelegram(pending[index])
+          .then(function() {
+            showToast('\u2705 Заявка от ' + pending[index].firstName + ' отправлена!');
+          })
+          .catch(function() {
+            // не удалось — оставляем в localStorage
+          })
+          .finally(function() {
+            processNext(index + 1);
+          });
+      }
+      
+      processNext(0);
     }
-  }
-  
-  retryPendingForms();
+  })();
 })();
 </script>
 
