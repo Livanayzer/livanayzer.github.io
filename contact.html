@@ -164,7 +164,7 @@
           <div class="contact-methods">
             <div class="contact-method">
               <div class="contact-method-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
-              <div class="contact-method-text"><h4>Телефон</h4><a href="tel:+79278552529">+7 (927) 855-25-29</a></div>
+              <div class="contact-method-text"><h4>Телефон</h4><a href="tel:+79169783348">+7 (916) 978-33-48</a></div>
             </div>
             <div class="contact-method">
               <div class="contact-method-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
@@ -245,169 +245,80 @@
   </div>
 </footer>
 
+
 <script src="js/cursor.js"></script>
 <script>
-// ============ ФОРМА С ОТПРАВКОЙ В TELEGRAM ============
 (function() {
-  // ⚠️ ЗАМЕНИТЕ НА РЕАЛЬНЫЕ ДАННЫЕ ⚠️
-  var TELEGRAM_BOT_TOKEN = 'YOUR_BOT_TOKEN';
-  var TELEGRAM_CHAT_ID = 'YOUR_CHAT_ID';
+  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8E5fgOBLLPQtHWSef47HZ1BkRBmXAJYqPQAZAjjkEEoatTjUfS1A_uem5R3UbqfvQ/exec';
   
   var form = document.getElementById('contactForm');
-  if (!form) return; // ← не ломаем страницу, если формы нет
+  if (!form) return;
   
   var submitBtn = document.getElementById('submitBtn');
   var formSuccess = document.getElementById('formSuccess');
   var formError = document.getElementById('formError');
   
-  // Тостер
-  function showToast(message, isError) {
-    var existingToast = document.querySelector('.toast-notification');
-    if (existingToast) existingToast.remove();
-    
-    var toast = document.createElement('div');
-    toast.className = 'toast-notification' + (isError ? ' error' : '');
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    setTimeout(function() { toast.classList.add('show'); }, 10);
-    
-    setTimeout(function() {
-      toast.classList.remove('show');
-      setTimeout(function() { toast.remove(); }, 300);
-    }, 3000);
+  function showToast(msg, err) {
+    var existing = document.querySelector('.toast-notification');
+    if (existing) existing.remove();
+    var t = document.createElement('div');
+    t.className = 'toast-notification' + (err ? ' error' : '');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function() { t.classList.add('show'); }, 10);
+    setTimeout(function() { t.classList.remove('show'); setTimeout(function() { t.remove(); }, 300); }, 3000);
   }
   
-  // Валидация
   function validateForm() {
-    var firstName = document.getElementById('firstName').value.trim();
+    var name = document.getElementById('firstName').value.trim();
     var email = document.getElementById('email').value.trim();
     var phone = document.getElementById('phone').value.trim();
-    
-    if (!firstName) { showToast('Пожалуйста, укажите имя', true); return false; }
-    if (!email) { showToast('Пожалуйста, укажите email', true); return false; }
-    if (!/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/.test(email)) {
-      showToast('Введите корректный email', true);
-      return false;
-    }
-    if (!phone) { showToast('Пожалуйста, укажите телефон', true); return false; }
-    
+    if (!name) { showToast('Укажите имя', true); return false; }
+    if (!email || !/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/.test(email)) { showToast('Укажите корректный email', true); return false; }
+    if (!phone) { showToast('Укажите телефон', true); return false; }
     return true;
   }
   
-  // Отправка в Telegram
-  function sendToTelegram(formData) {
-    if (TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN' || TELEGRAM_CHAT_ID === 'YOUR_CHAT_ID') {
-      console.log('Демо-режим: заявка обработана локально');
-      return new Promise(function(resolve) {
-        setTimeout(function() { resolve({ ok: true, demo: true }); }, 1000);
-      });
-    }
-    
-    var message = '\uD83D\uDCCB *НОВАЯ ЗАЯВКА С САЙТА HAZE IT*\n\n' +
-      '\uD83D\uDC64 *Клиент:* ' + formData.firstName + ' ' + (formData.lastName || '') + '\n' +
-      '\uD83D\uDCE7 *Email:* ' + formData.email + '\n' +
-      '\uD83D\uDCDE *Телефон:* ' + formData.phone + '\n' +
-      '\uD83D\uDCAC *Сообщение:* ' + (formData.message || 'не указано') + '\n\n' +
-      '\uD83D\uDD50 *Время:* ' + new Date().toLocaleString('ru-RU');
-    
-    var url = 'https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage';
-    
-    return fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: message,
-        parse_mode: 'Markdown'
-      })
-    }).then(function(response) {
-      return response.json();
-    });
-  }
-  
-  // Сохранение в localStorage
-  function saveToLocalStorage(formData) {
-    var pending = [];
-    try { pending = JSON.parse(localStorage.getItem('pending_forms') || '[]'); } catch(e) {}
-    pending.push({ firstName: formData.firstName, lastName: formData.lastName, email: formData.email, phone: formData.phone, message: formData.message, timestamp: Date.now() });
-    try { localStorage.setItem('pending_forms', JSON.stringify(pending)); } catch(e) {}
-  }
-  
-  // Отправка формы
   form.addEventListener('submit', function(e) {
     e.preventDefault();
-    
     if (!validateForm()) return;
     
-    var formData = {
-      firstName: document.getElementById('firstName').value.trim(),
-      lastName: document.getElementById('lastName').value.trim(),
+    var data = {
+      name: document.getElementById('firstName').value.trim() + ' ' + document.getElementById('lastName').value.trim(),
       email: document.getElementById('email').value.trim(),
       phone: document.getElementById('phone').value.trim(),
-      message: document.getElementById('message').value.trim()
+      message: document.getElementById('message').value.trim() || '—'
     };
     
     submitBtn.disabled = true;
     submitBtn.textContent = 'Отправка...';
     formError.classList.remove('visible');
     
-    sendToTelegram(formData)
-      .then(function(result) {
-        if (result.ok || result.demo) {
-          form.style.display = 'none';
-          formSuccess.classList.add('visible');
-          showToast('\u2705 Заявка успешно отправлена! Мы свяжемся с вами.');
-        } else {
-          throw new Error(result.description || 'Ошибка отправки');
-        }
-      })
-      .catch(function(error) {
-        console.error('Не удалось отправить заявку. Данные сохранены локально.');
-        
-        saveToLocalStorage(formData);
-        
-        formError.textContent = '\u26A0\uFE0F Не удалось отправить заявку. Данные сохранены локально, мы свяжемся с вами в ближайшее время.';
-        formError.classList.add('visible');
-        showToast('\u26A0\uFE0F Ошибка отправки, но данные сохранены. Мы с вами свяжемся!', true);
-        
-        if (TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN') {
-          form.style.display = 'none';
-          formSuccess.classList.add('visible');
-        }
-      })
-      .finally(function() {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Отправить заявку';
-      });
-  });
-  
-  // Повторная отправка сохранённых заявок
-  (function retryPending() {
-    var pending = [];
-    try { pending = JSON.parse(localStorage.getItem('pending_forms') || '[]'); } catch(e) {}
-    
-    if (pending.length > 0 && TELEGRAM_BOT_TOKEN !== 'YOUR_BOT_TOKEN') {
-      showToast('\uD83D\uDCE6 Есть ' + pending.length + ' неотправленных заявок, пробуем отправить...');
-      
-      function processNext(index) {
-        if (index >= pending.length) return;
-        
-        sendToTelegram(pending[index])
-          .then(function() {
-            showToast('\u2705 Заявка от ' + pending[index].firstName + ' отправлена!');
-          })
-          .catch(function() {
-            // не удалось — оставляем в localStorage
-          })
-          .finally(function() {
-            processNext(index + 1);
-          });
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.ok) {
+        form.style.display = 'none';
+        formSuccess.classList.add('visible');
+        showToast('✅ Заявка отправлена!');
+      } else {
+        throw new Error();
       }
-      
-      processNext(0);
-    }
-  })();
+    })
+    .catch(function() {
+      formError.textContent = '⚠️ Не удалось. Позвоните: +7 (927) 855-25-29';
+      formError.classList.add('visible');
+      showToast('⚠️ Ошибка. Позвоните нам.', true);
+    })
+    .finally(function() {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Отправить заявку';
+    });
+  });
 })();
 </script>
 
